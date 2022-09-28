@@ -1,3 +1,9 @@
+import re
+
+import bs4
+import pandas as pd
+import requests
+
 url = "https://pitchfork.com/features/lists-and-guides/the-best-songs-of-the-1990s/"
 
 
