@@ -1,16 +1,18 @@
-import bs4
 import re
+
+import bs4
 import pandas as pd
 import requests
+
 
 def parse_list(url: str, parse_type: str) -> pd.DataFrame:
     """
     Scrape and parse song or album data from a given URL.
-    
+
     Parameters:
         url (str): The URL to scrape.
         parse_type (str): The type of data to parse ("song" or "album").
-        
+
     Returns:
         pd.DataFrame: A DataFrame containing the scraped Artist, Title, and Year information.
     """
@@ -25,7 +27,7 @@ def parse_list(url: str, parse_type: str) -> pd.DataFrame:
     song_strings = [str(x).strip("<h2>").strip("</") for x in soup.find_all("h2")]
 
     # Decide the regex pattern based on parse_type
-    title_pattern = r'“(.*?)”' if parse_type == "song" else r"<em>(.*?)</em>"
+    title_pattern = r"“(.*?)”" if parse_type == "song" else r"<em>(.*?)</em>"
 
     artists, titles, years = [], [], []
     for s in song_strings:
