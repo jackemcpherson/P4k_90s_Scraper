@@ -1,29 +1,30 @@
-import re
-
 import bs4
+import re
 import pandas as pd
 import requests
 
 
-def parseSongList(url: str):
-    r = requests.get(url)
+def parseList(url: str, parse_type: str) -> pd.DataFrame:
+    try:
+        r = requests.get(url)
+        r.raise_for_status()
+    except requests.RequestException as e:
+        print(f"Failed to get URL: {e}")
+        return pd.DataFrame()
+
     soup = bs4.BeautifulSoup(r.content.decode("utf-8", "ignore"), "lxml")
     song_strings = [str(x).strip("<h2>").strip("</") for x in soup.find_all("h2")]
-    artists = [x.split(":")[0] for x in song_strings]
-    titles = [re.findall("“(.*?)”", x)[0] for x in song_strings]
-    years = [re.findall(r"\(([0-9]{4}?)\)", x)[0] for x in song_strings]
-    scraped_values = {"Artist": artists, "Title": titles, "Year": years}
-    df = pd.DataFrame.from_dict(scraped_values)
-    return df
 
+    # Decide the regex pattern based on parse_type
+    title_pattern = r'“(.*?)”' if parse_type == "song" else r"<em>(.*?)</em>"
 
-def parseAlbumList(url: str):
-    r = requests.get(url)
-    soup = bs4.BeautifulSoup(r.content.decode("utf-8", "ignore"), "lxml")
-    song_strings = [str(x).strip("<h2>").strip("</") for x in soup.find_all("h2")]
-    artists = [x.split(":")[0] for x in song_strings]
-    titles = [re.findall(r"<em>(.*?)</em>", x)[0] for x in song_strings]
-    years = [re.findall(r"\(([0-9]{4}?)\)", x)[0] for x in song_strings]
-    scraped_values = {"Artist": artists, "Title": titles, "Year": years}
-    df = pd.DataFrame.from_dict(scraped_values)
+    artists, titles, years = [], [], []
+    for s in song_strings:
+        artists.append(s.split(":")[0])
+        title_match = re.findall(title_pattern, s)
+        titles.append(title_match[0] if title_match else "Unknown")
+        year_match = re.findall(r"\(([0-9]{4})\)", s)
+        years.append(year_match[0] if year_match else "Unknown")
+
+    df = pd.DataFrame({"Artist": artists, "Title": titles, "Year": years})
     return df
