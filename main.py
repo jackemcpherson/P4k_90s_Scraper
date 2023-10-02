@@ -3,8 +3,17 @@ import re
 import pandas as pd
 import requests
 
-
-def parseList(url: str, parse_type: str) -> pd.DataFrame:
+def parse_list(url: str, parse_type: str) -> pd.DataFrame:
+    """
+    Scrape and parse song or album data from a given URL.
+    
+    Parameters:
+        url (str): The URL to scrape.
+        parse_type (str): The type of data to parse ("song" or "album").
+        
+    Returns:
+        pd.DataFrame: A DataFrame containing the scraped Artist, Title, and Year information.
+    """
     try:
         r = requests.get(url)
         r.raise_for_status()
